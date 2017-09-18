@@ -1,0 +1,214 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>图片轮播</title>
+</head>
+
+<body>
+	<div class='container'>
+        <div class='pic_wrap'>
+            <div class='pic'><img src='img1.jpg'/></div>
+            <div class='pic'><img src='img2.jpg'/></div>
+            <div class='pic test'><img src='img3.jpg'/></div>
+            <div class='pic'><img src='img4.jpg'/></div>
+            <div class='pic'><img src='img5.jpg'/></div>
+        </div>
+        <div class="point_wrap">
+            <span index='1'></span>
+            <span index='2'></span>
+            <span index='3'  class='on'></span>
+            <span index='4'></span>
+            <span index='5'></span>
+        </div>
+    </div>
+    <button>切换</button>
+    
+<script>
+	let index=0
+	let net_off
+	let current=2
+	let last=2
+	let pics=document.getElementsByClassName('pic')
+	let spans=document.getElementsByTagName('span')
+	let tt=document.getElementsByClassName('on')[0]
+	let button=document.getElementsByTagName('button')[0]
+	let run=setInterval(row_pic,2000)
+	
+	/*------------------设图片置初始位置----------------*/
+	for (let i=0;i<pics.length;i++){
+		pics[i].style.left=(-2+i).toString()+'00%'
+	}
+	/*--------------------给每个小圆点注册摁键函数------------*/
+	for (let i=0; i<spans.length;i++){
+		spans[i].onclick=function(){
+			let spans=document.getElementsByTagName('span')
+			let ons=document.getElementsByClassName('on')
+			for (let i=0;i<ons.length;i++){
+				ons[i].setAttribute('class',' ')
+			}
+			let pics=document.getElementsByClassName('pic')
+			for (let i=0;i<pics.length;i++){
+				pics[i].style.visibility='visible'
+			}
+			spans[i].setAttribute('class','on')
+			current=i
+			pic_position(i+1)
+			window.clearInterval(run)
+			run=setInterval(row_pic,2000)
+		}
+	}	
+	
+	button.onclick=function(){
+		row_pic()
+		window.clearInterval(run)
+		run=setInterval(row_pic,2000)
+		toggle_class(pics[2],'test')
+	
+	}
+
+	function row_pic() {
+		current+=1
+		if (current==5){
+			current=0
+		}
+		if (current==0){
+			last=4
+		}
+		else {
+			last=current-1
+		}
+		chan_poi(current)
+		pic_position()		
+	}
+
+	/*----------------------这个函数用于改变小圆点-----------------*/
+	function chan_poi(target){
+		let spans=document.getElementsByTagName('span')
+		spans[last].setAttribute('class',' ')
+		spans[target].setAttribute('class','on')
+	}
+	/*----------------------------该函数用于切换图片状体，没有输入的时候轮播，有的时候设定位置----------*/
+	function pic_position(goal){
+		let pics=document.getElementsByClassName('pic')
+		let delta= (goal==null)?1:goal-current
+		for (let i=0;i<pics.length;i++){
+			if (goal==null){
+				if(pics[i].style.left[0]=='-'){
+					net_off=parseInt(pics[i].style.left.substring(0,2))-delta
+				}
+				else {
+					net_off=parseInt(pics[i].style.left[0])-delta
+				}
+				if(net_off<-2){
+					net_off+=5
+				}
+				pics[i].style.left=(net_off).toString()+'00%'
+				if (net_off==2){
+					pics[i].style.visibility='hidden'
+				}
+				else{
+					pics[i].style.visibility='visible'
+				}
+			}
+			else {
+				net_off=i-goal+1
+				if(net_off<-2){
+					net_off+=5
+				}
+				pics[i].style.left=(net_off).toString()+'00%'
+			}
+		}			
+	}
+	/*------------------以下是toggle_class方法-------*/
+	function toggle_class(object,class_name) {
+		let current_class=object.getAttribute('class')
+		if (current_class.indexOf(class_name)!=-1){
+			object.setAttribute('class',current_class.replace(class_name,''))
+		}
+		else {
+			if(current_class[current_class.length-1]==' '){
+				object.setAttribute('class',current_class+class_name)
+			}
+			else 
+				object.setAttribute('class',current_class+" "+class_name)
+		}
+	}
+	/*---------以下部分是为了测试获取属性的方法-----------
+	let pics=document.getElementsByClassName('test')[0]
+	console.log(pics)
+	//console.log(pics.getAttribute('left'))
+	let attribute= document.defaultView.getComputedStyle(pics, null)
+	console.log(attribute.height)
+	console.log(attribute)*/
+	
+	/*--------------------以下部分是一个非循环的轮播实现，不是队列形式------------
+	let picc=document.getElementsByClassName('pic')
+	for (let i=1;i<picc.length;i++){
+		picc[i].style.left=(1).toString()+'00%'
+	}
+	let index=0
+	let button=document.getElementsByTagName('button')[0]
+	button.onclick=function(){
+		index+=1
+		if (index==5){
+			index=0
+		}
+		let picc=document.getElementsByClassName('pic')
+		for (let i=0;i<picc.length;i++){
+			picc[i].style.left=(1).toString()+'00%'
+		}
+		picc[index].style.left='0%'
+	}*/
+
+</script>
+</body>
+</html>
+
+<style>
+.container {
+	position:absolute;
+	left:30%;
+	width:20%;
+	height:60%;
+	overflow:hidden;
+}
+.pic_wrap {
+	width:100%;
+	height:100%;
+}
+.pic, img {
+	position:absolute;
+	width:100%;
+	height:100%;
+	transition:left 1s;
+}
+.point_wrap {
+	position:absolute;
+	left:40%;
+	bottom:5%;
+	width:40%;
+	height:10%;
+}
+.test {
+	left:100%;
+}
+button {
+	position:absolute;
+	top:70%;
+}
+
+span {
+	float:left;
+	margin-right:5%;
+	width:10px;
+	height:10px;
+	border-radius:50%;
+	background-color:#333;
+	cursor:pointer;
+}
+
+.on {
+	background-color:red;
+}
+</style>
